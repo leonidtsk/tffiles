@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Просмотр файлов в репозитории</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin: 5px 0;
+        }
+        a {
+            text-decoration: none;
+            color: blue;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Файлы в репозитории</h1>
+    <ul id="file-list"></ul>
+
+    <script>
+        // Замените 'username' и 'repository' на ваши данные
+        const username = 'your-github-username';
+        const repository = 'your-repository-name';
+
+        // Функция для получения списка файлов
+        async function fetchFiles() {
+            try {
+                const response = await fetch(https://api.github.com/repos/${username}/${repository}/contents/);
+                if (!response.ok) {
+                    throw new Error('Сеть ответила с ошибкой');
+                }
+                const files = await response.json();
+                const fileList = document.getElementById('file-list');
+
+                files.forEach(file => {
+                    const li = document.createElement('li');
+                    const a = document.createElement('a');
+                    a.href = file.download_url; // Ссылка для загрузки файла
+                    a.textContent = file.name; // Имя файла
+                    li.appendChild(a);
+                    fileList.appendChild(li);
+                });
+            } catch (error) {
+                console.error('Ошибка при загрузке файлов:', error);
+            }
+        }
+
+        // Вызов функции при загрузке страницы
+        window.onload = fetchFiles;
+    </script>
+</body>
+</html>
