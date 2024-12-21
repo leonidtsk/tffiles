@@ -31,29 +31,49 @@
         const owner = 'leonidtsk';
         const repo = 'tffiles';
         const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/`;
+        const fileList = document.getElementById('file-list');
 
-        fetch(apiUrl)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Сеть не отвечает');
-                }
-                return response.json();
-            })
-            .then(data => {
-                const fileList = document.getElementById('file-list');
-                data.forEach(item => {
-                    const listItem = document.createElement('li');
-                    const link = document.createElement('a');
-                    link.href = item.html_url;
-                    link.textContent = item.name;
-                    listItem.appendChild(link);
-                    fileList.appendChild(listItem);
+        // Функция для загрузки содержимого папки
+        function loadFolderContents(url) {
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Сеть не отвечает');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    fileList.innerHTML = '';  // Очистить список
+                    data.forEach(item => {
+                        const listItem = document.createElement('li');
+                        const link = document.createElement('a');
+
+                        if (item.type === 'file') {
+                            // Для файла создаем ссылку с атрибутом download
+                            link.href = item.download_url;
+                            link.textContent = item.name;
+                            link.setAttribute('download', item.name);
+                        } else if (item.type === 'dir') {
+                            // Для папки создаем ссылку для перехода внутрь
+                            link.href = '#';
+                            link.textContent = item.name;
+                            link.addEventListener('click', () => {
+                                loadFolderContents(item.url);  // Загружаем содержимое папки
+                            });
+                        }
+
+                        listItem.appendChild(link);
+                        fileList.appendChild(listItem);
+                    });
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    document.body.innerHTML = '<h2>Произошла ошибка при загрузке данных.</h2>';
                 });
-            })
-            .catch(error => {
-                console.error('Ошибка:', error);
-                document.body.innerHTML = '<h2>Произошла ошибка при загрузке данных.</h2>';
-            });
+        }
+
+        // Загружаем содержимое главной папки репозитория
+        loadFolderContents(apiUrl);
     </script>
 </body>
 </html>
