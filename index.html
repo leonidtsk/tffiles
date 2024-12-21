@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Просмотр файлов в репозитории</title>
+    <title>Файлы и папки в репозитории</title>
     <style>
         body {
             font-family: Arial, sans-serif;
+            margin: 20px;
         }
         ul {
             list-style-type: none;
-            padding: 0;
         }
         li {
             margin: 5px 0;
@@ -25,39 +25,36 @@
     </style>
 </head>
 <body>
-    <h1>Файлы в репозитории</h1>
+    <h1>Содержимое репозитория: tffiles</h1>
     <ul id="file-list"></ul>
 
     <script>
-        // Замените 'your-github-username' и 'your-repository-name' на ваши данные
-        const username = 'leonditsk';
-        const repository = 'tffiles';
+        const owner = 'leonidtsk';
+        const repo = 'tffiles';
+        const apiUrl = https://api.github.com/repos/${owner}/${repo}/contents/;
 
-        // Функция для получения списка файлов
-        async function fetchFiles() {
-            try {
-                const response = await fetch(`https://api.github.com/repos/${username}/${repository}/contents/`);
+        fetch(apiUrl)
+            .then(response => {
                 if (!response.ok) {
-                    throw new Error('Сеть ответила с ошибкой');
+                    throw new Error('Сеть не отвечает');
                 }
-                const files = await response.json();
+                return response.json();
+            })
+            .then(data => {
                 const fileList = document.getElementById('file-list');
-
-                files.forEach(file => {
-                    const li = document.createElement('li');
-                    const a = document.createElement('a');
-                    a.href = file.download_url; // Ссылка для загрузки файла
-                    a.textContent = file.name; // Имя файла
-                    li.appendChild(a);
-                    fileList.appendChild(li);
+                data.forEach(item => {
+                    const listItem = document.createElement('li');
+                    const link = document.createElement('a');
+                    link.href = item.html_url;
+                    link.textContent = item.name;
+                    listItem.appendChild(link);
+                    fileList.appendChild(listItem);
                 });
-            } catch (error) {
-                console.error('Ошибка при загрузке файлов:', error);
-            }
-        }
-
-        // Вызов функции при загрузке страницы
-        window.onload = fetchFiles;
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                document.body.innerHTML = '<h2>Произошла ошибка при загрузке данных.</h2>';
+            });
     </script>
 </body>
 </html>
