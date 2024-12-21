@@ -49,10 +49,12 @@
                         const link = document.createElement('a');
 
                         if (item.type === 'file') {
-                            // Для файла создаем ссылку с атрибутом download
-                            link.href = item.download_url;
+                            // Для файла создаем ссылку с обработчиком скачивания
+                            link.href = '#';
                             link.textContent = item.name;
-                            link.setAttribute('download', item.name);
+                            link.addEventListener('click', () => {
+                                downloadFile(item.download_url, item.name);
+                            });
                         } else if (item.type === 'dir') {
                             // Для папки создаем ссылку для перехода внутрь
                             link.href = '#';
@@ -69,6 +71,26 @@
                 .catch(error => {
                     console.error('Ошибка:', error);
                     document.body.innerHTML = '<h2>Произошла ошибка при загрузке данных.</h2>';
+                });
+        }
+
+        // Функция для скачивания файла
+        function downloadFile(url, filename) {
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Не удалось скачать файл');
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = filename;
+                    link.click();  // Эмулируем клик для скачивания
+                })
+                .catch(error => {
+                    console.error('Ошибка при скачивании файла:', error);
                 });
         }
 
