@@ -15,8 +15,8 @@
         }
         li {
             margin: 5px 0;
-            position: relative; /* Для псевдо-элемента */
-            padding-bottom: 10px; /* Отступ снизу для разделителя */
+            position: relative;
+            padding-bottom: 10px;
         }
         li::after {
             content: '';
@@ -25,11 +25,11 @@
             left: 0;
             width: 100%;
             height: 1px;
-            background-color: #ccc; /* Серый цвет для разделителя */
+            background-color: #ccc;
             display: block;
         }
         li:last-child::after {
-            display: none; /* Убираем разделитель после последнего элемента */
+            display: none;
         }
         a {
             text-decoration: none;
@@ -39,8 +39,20 @@
         }
         img {
             margin-right: 10px;
-            width: 24px;  /* Увеличиваем размер иконки */
+            width: 24px;
             height: 24px;
+        }
+        .back-button {
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            cursor: pointer;
+        }
+        .back-button img {
+            margin-right: 8px;
+        }
+        .back-button.show {
+            display: flex;
         }
         a:hover {
             text-decoration: underline;
@@ -49,6 +61,10 @@
 </head>
 <body>
     <h1>Содержимое репозитория: tffiles</h1>
+    <div id="back-button" class="back-button">
+        <img src="https://raw.githubusercontent.com/leonidtsk/tffiles/main/img/back.png" alt="Back" />
+        <span>Назад</span>
+    </div>
     <ul id="file-list"></ul>
 
     <script>
@@ -56,9 +72,13 @@
         const repo = 'tffiles';
         const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/`;
         const fileList = document.getElementById('file-list');
+        const backButton = document.getElementById('back-button');
+
+        let currentFolderUrl = apiUrl; // Изначально корневая папка
+        let previousFolderUrl = null; // Нет предыдущей папки
 
         // Функция для загрузки содержимого папки
-        function loadFolderContents(url) {
+        function loadFolderContents(url, isBack = false) {
             fetch(url)
                 .then(response => {
                     if (!response.ok) {
@@ -68,11 +88,22 @@
                 })
                 .then(data => {
                     fileList.innerHTML = '';  // Очистить список
+
+                    // Отображаем кнопку возврата только если не на корневой папке
+                    if (url !== apiUrl) {
+                        backButton.classList.add('show');
+                    } else {
+                        backButton.classList.remove('show');
+                    }
+
+                    // Запоминаем текущую папку как предыдущую
+                    previousFolderUrl = isBack ? previousFolderUrl : currentFolderUrl;
+                    currentFolderUrl = url;
+
                     data.forEach(item => {
                         const listItem = document.createElement('li');
                         const link = document.createElement('a');
 
-                        // Добавляем иконки
                         const icon = document.createElement('img');
 
                         if (item.type === 'file') {
@@ -121,6 +152,13 @@
                     console.error('Ошибка при скачивании файла:', error);
                 });
         }
+
+        // Обработчик для кнопки "Назад"
+        backButton.addEventListener('click', () => {
+            if (previousFolderUrl) {
+                loadFolderContents(previousFolderUrl, true); // Загружаем предыдущую папку
+            }
+        });
 
         // Загружаем содержимое главной папки репозитория
         loadFolderContents(apiUrl);
