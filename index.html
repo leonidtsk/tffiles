@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -17,6 +18,13 @@
         a {
             text-decoration: none;
             color: blue;
+            display: flex;
+            align-items: center;
+        }
+        img {
+            margin-right: 8px;
+            width: 16px;  /* Размер иконки */
+            height: 16px;
         }
         a:hover {
             text-decoration: underline;
@@ -48,15 +56,18 @@
                         const listItem = document.createElement('li');
                         const link = document.createElement('a');
 
+                        // Добавляем иконки
+                        const icon = document.createElement('img');
+
                         if (item.type === 'file') {
-                            // Для файла создаем ссылку с обработчиком скачивания
+                            icon.src = `https://raw.githubusercontent.com/${owner}/${repo}/main/img/file.png`; // Иконка для файла
                             link.href = '#';
                             link.textContent = item.name;
                             link.addEventListener('click', () => {
                                 downloadFile(item.download_url, item.name);
                             });
                         } else if (item.type === 'dir') {
-                            // Для папки создаем ссылку для перехода внутрь
+                            icon.src = `https://raw.githubusercontent.com/${owner}/${repo}/main/img/folder.png`; // Иконка для папки
                             link.href = '#';
                             link.textContent = item.name;
                             link.addEventListener('click', () => {
@@ -64,6 +75,7 @@
                             });
                         }
 
+                        link.prepend(icon);  // Добавляем иконку перед текстом
                         listItem.appendChild(link);
                         fileList.appendChild(listItem);
                     });
